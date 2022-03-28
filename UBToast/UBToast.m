@@ -17,7 +17,7 @@ static CGFloat const DEFAULT_DISPLAY_DURATION = 2.0;
 #pragma mark - life cycle
 - (instancetype)initWithMessage:(NSString *)message {
     if (self = [super init]) {
-        CGSize textSize = [message boundingRectWithSize:CGSizeMake(280, MAXFLOAT) options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:14]} context:nil].size;
+        CGSize textSize = [message boundingRectWithSize:CGSizeMake(280, 300) options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading attributes:@{NSFontAttributeName : self.titleLabel.font} context:nil].size;
         
         self.titleLabel.text = message;
         self.titleLabel.frame = CGRectMake(0, 0, textSize.width + 12, textSize.height + 12);
@@ -115,15 +115,9 @@ static CGFloat const DEFAULT_DISPLAY_DURATION = 2.0;
 
 #pragma mark - animations
 - (void)showAnimation {
-
     [UIView animateWithDuration:0.3 delay:0.0 options:UIViewAnimationOptionCurveEaseIn animations:^{
         self.titleBGView.alpha = 1.0f;
     } completion:^(BOOL finished) { }];
-//    [UIView beginAnimations:@"show" context:NULL];
-//    [UIView setAnimationCurve:UIViewAnimationCurveEaseIn];
-//    [UIView setAnimationDuration:0.3];
-//    self.titleBGView.alpha = 1.0f;
-//    [UIView commitAnimations];
 }
 
 - (void)hideAnimation {
@@ -133,14 +127,6 @@ static CGFloat const DEFAULT_DISPLAY_DURATION = 2.0;
     } completion:^(BOOL finished) {
         [self dismissToast];
     }];
-
-//    [UIView beginAnimations:@"hide" context:NULL];
-//    [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
-//    [UIView setAnimationDelegate:self];
-//    [UIView setAnimationDidStopSelector:@selector(dismissToast)];
-//    [UIView setAnimationDuration:0.3];
-//    self.titleBGView.alpha = 0.0f;
-//    [UIView commitAnimations];
 }
 
 
@@ -150,7 +136,6 @@ static CGFloat const DEFAULT_DISPLAY_DURATION = 2.0;
 }
 
 - (void)show {
-    
     self.titleBGView.center = CGPointMake(keyWindow().center.x, keyWindow().center.y + 30);
     [keyWindow()  addSubview:self.titleBGView];
     [self showAnimation];
@@ -188,7 +173,8 @@ static CGFloat const DEFAULT_DISPLAY_DURATION = 2.0;
         textLabel.backgroundColor = [UIColor clearColor];
         textLabel.textColor = [UIColor whiteColor];
         textLabel.textAlignment = NSTextAlignmentCenter;
-        textLabel.font = [UIFont systemFontOfSize:14];;
+        textLabel.font = [UIFont systemFontOfSize:14];
+        textLabel.numberOfLines = 0;
     }
     return _titleLabel;
 }
