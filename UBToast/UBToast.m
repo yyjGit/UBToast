@@ -2,6 +2,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 static CGFloat const DEFAULT_DISPLAY_DURATION = 2.0;
+static NSString *const UBToastShowModeKey = @"UBToastShowModeKey";
 
 @interface UBToast ()
 
@@ -20,8 +21,12 @@ static CGFloat const DEFAULT_DISPLAY_DURATION = 2.0;
         CGSize textSize = [message boundingRectWithSize:CGSizeMake(280, 300) options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading attributes:@{NSFontAttributeName : self.titleLabel.font} context:nil].size;
         
         self.titleLabel.text = message;
-        self.titleLabel.frame = CGRectMake(0, 0, textSize.width + 12, textSize.height + 12);
-
+        if ([UBToast currentMode] == UBToastShowMode_V011) {
+            self.titleLabel.frame = CGRectMake(0, 0, textSize.width + 12, textSize.height + 12);
+        } else if ([UBToast currentMode] == UBToastShowMode_V012) {
+            self.titleLabel.frame = CGRectMake(0, 0, textSize.width + 80, textSize.height + 20);
+        }
+        
         self.titleBGView.frame = CGRectMake(0, 0, self.titleLabel.frame.size.width, self.titleLabel.frame.size.height);
         [self.titleBGView addSubview:self.titleLabel];
 
@@ -39,6 +44,15 @@ static CGFloat const DEFAULT_DISPLAY_DURATION = 2.0;
 
 
 #pragma mark - public methods
+/// 更新展示模式-全局的
+/// @param mode 模式
++ (void)updateShowMode:(UBToastShowMode)mode
+{
+    [[NSUserDefaults standardUserDefaults] setInteger:mode forKey:UBToastShowModeKey];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+
 /// 展示一段信息
 /// @param message 要展示的信息
 + (void)showMessage:(NSString *)message {
@@ -164,6 +178,13 @@ static CGFloat const DEFAULT_DISPLAY_DURATION = 2.0;
     [self performSelector:@selector(hideAnimation) withObject:nil afterDelay:self.duration];
 }
 
+#pragma mark - getters
++ (UBToastShowMode)currentMode
+{
+    NSInteger mode = [[NSUserDefaults standardUserDefaults] integerForKey:UBToastShowModeKey];
+    return (UBToastShowMode)mode;
+}
+
 
 #pragma mark - getters
 - (UILabel *)titleLabel {
@@ -171,10 +192,18 @@ static CGFloat const DEFAULT_DISPLAY_DURATION = 2.0;
         UILabel *textLabel = [[UILabel alloc] init];
         _titleLabel = textLabel;
         textLabel.backgroundColor = [UIColor clearColor];
-        textLabel.textColor = [UIColor whiteColor];
+        
         textLabel.textAlignment = NSTextAlignmentCenter;
         textLabel.font = [UIFont systemFontOfSize:14];
         textLabel.numberOfLines = 0;
+        
+        
+        if ([UBToast currentMode] == UBToastShowMode_V011) {
+            textLabel.textColor = [UIColor whiteColor];
+        } else if ([UBToast currentMode] == UBToastShowMode_V012) {
+            textLabel.textColor = [UIColor colorWithRed:1.0 green:205.0/255.0 blue:75.0/255 alpha:1.0];
+        }
+
     }
     return _titleLabel;
 }
@@ -183,13 +212,20 @@ static CGFloat const DEFAULT_DISPLAY_DURATION = 2.0;
     if (!_titleBGView) {
         UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
         _titleBGView = btn;
-        btn.layer.cornerRadius = 5.0f;
-        btn.layer.borderWidth = 1.0f;
-        btn.layer.borderColor = [[UIColor grayColor] colorWithAlphaComponent:0.5].CGColor;
-        btn.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
         btn.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         [btn addTarget:self action:@selector(toastTaped:) forControlEvents:UIControlEventTouchDown];
         btn.alpha = 0.0f;
+        
+        if ([UBToast currentMode] == UBToastShowMode_V011) {
+            btn.layer.cornerRadius = 5.0f;
+            btn.layer.borderWidth = 1.0f;
+            btn.layer.borderColor = [[UIColor grayColor] colorWithAlphaComponent:0.5].CGColor;
+            btn.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+        } else if ([UBToast currentMode] == UBToastShowMode_V012) {
+            btn.layer.cornerRadius = 18.0f;
+            btn.layer.borderWidth = 0.0f;
+            btn.backgroundColor = [UIColor colorWithRed:42.0/255.0 green:41.0/255.0 blue:38.0/255.0 alpha:1.0];
+        }
     }
     return _titleBGView;;
 }
